@@ -1,13 +1,20 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  theme: {
-    extend: {
-      colors: {
-        primary: "#17AF26",
-        secodary: "#05422C",
-      },
+    content: ['./*.html'],
+    theme: {
+        extend: {
+            colors: {
+                primary: '#17AF26',
+                secondary: '#05422C',
+                'neutral-400': '#F4F4F4',
+            },
+            backgroundSize: {
+                '50%': '50%',
+            },
+            backgroundImage: {
+                item: "url('./assets/images/bgPattern.png')",
+            },
+        },
     },
-  },
-  plugins: [],
+    plugins: [],
 };
