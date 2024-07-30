@@ -1,3 +1,4 @@
+import { ICategory } from "@/common/types/category";
 import { Button } from "@/components/ui/button";
 import instance from "@/configs/axios";
 
@@ -6,30 +7,12 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { DatePicker, Form, FormProps, Input, message } from "antd";
 import { Link, useParams } from "react-router-dom";
 
-type FieldType = {
-  name: string;
-};
-
-const CategoryEdit = () => {
-  const { id } = useParams();
-
-  const {
-    data: category,
-    isError,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["PRODUCTSID_KEY", id],
-    queryFn: async () => {
-      const res = await instance.get(`/category/${id}`);
-      return res.data;
-    },
-  });
-  console.log(category?.category);
+const CategoryAdd = () => {
+  const [form] = Form.useForm();
   const { mutate, isPending } = useMutation({
-    mutationFn: async (formdata: FieldType) => {
+    mutationFn: async (formdata: ICategory) => {
       try {
-        const response = await instance.put(`/category/${id}`, formdata);
+        const response = await instance.post(`/category`, formdata);
         console.log(response.data);
         return response.data;
       } catch (error: any) {
@@ -39,8 +22,9 @@ const CategoryEdit = () => {
     onSuccess: () => {
       message.open({
         type: "success",
-        content: "Cập nhật danh mục thành công",
+        content: "thêm danh mục thành công",
       });
+      form.resetFields();
     },
     onError: (error) => {
       message.open({
@@ -49,11 +33,10 @@ const CategoryEdit = () => {
       });
     },
   });
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
+  const onFinish: FormProps<ICategory>["onFinish"] = (values) => {
     mutate(values);
   };
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>{error.message}</div>;
+
   return (
     <div>
       <div>
@@ -61,7 +44,7 @@ const CategoryEdit = () => {
           <div className="flex items-center  justify-between">
             <h1 className="text-lg font-semibold md:text-2xl mr-5 ">
               {" "}
-              Edit : {category?.category?.name}
+              Add new category
             </h1>
 
             <Link to={"/admin/category"}>
@@ -70,7 +53,7 @@ const CategoryEdit = () => {
               </Button>
             </Link>
           </div>
-          <div className="max-w-3xl   border px-10 mt-5 py-10 bg-white rounded-[10px] shadow-2xl">
+          <div className="max-w-3xl   border px-10 mt-5 py-10 bg-white rounded-[10px]">
             {" "}
             <Form
               name="basic"
@@ -80,9 +63,8 @@ const CategoryEdit = () => {
               style={{ maxWidth: 600 }}
               disabled={isPending}
               onFinish={onFinish}
-              initialValues={{ ...category?.category }}
             >
-              <Form.Item<FieldType>
+              <Form.Item<ICategory>
                 label="Danh mục "
                 name="name"
                 rules={[
@@ -91,7 +73,7 @@ const CategoryEdit = () => {
               >
                 <Input placeholder="Nhập tên danh mục" />
               </Form.Item>
-              <Form.Item<FieldType>>
+              <Form.Item<ICategory>>
                 <button className="bg-black text-white px-4 py-3 rounded-[5px] hover:bg-white hover:text-black font-semibold border shadow-2xl">
                   Submit
                 </button>{" "}
@@ -104,4 +86,4 @@ const CategoryEdit = () => {
   );
 };
 
-export default CategoryEdit;
+export default CategoryAdd;
