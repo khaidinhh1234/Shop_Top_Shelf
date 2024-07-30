@@ -1,13 +1,13 @@
 export interface IProduct {
   _id?: string;
-  // id?: number,
   name: string;
   category?: string;
-  price: number;
+  regular_price: number;
   quantity?: number;
-
   description?: string;
   discount?: number;
   featured?: boolean;
-  countInStock?: number;
+  countIn_stock?: number;
+  feature_image?: string;
+  gallery_images?: string[];
 }
