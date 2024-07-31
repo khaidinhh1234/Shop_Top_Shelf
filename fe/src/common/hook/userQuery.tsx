@@ -1,7 +1,7 @@
 import instance from "@/configs/axios";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-const useUserQuery = ({ action, id }: { action: string; id?: string }) => {
+const useUserQuery = ({ action, id }: { action?: string; id?: string }) => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [
       action == "products"

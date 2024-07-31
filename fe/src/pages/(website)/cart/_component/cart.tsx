@@ -1,18 +1,16 @@
-import useCart from "@/common/hook/useCart";
+import { useCart, useCartMutate } from "@/common/hook/useCart";
 import { useLocalStorage } from "@/common/hook/useStoratge";
 import { IProduct } from "@/common/types/product";
+import { useState } from "react";
 
 const CartPage = () => {
   const [user] = useLocalStorage("user", {});
-  const userId = user.user._id;
-  const { mutate, ...form } = useCart();
-  // const update1 = async (action: any) => {
+  const userId = user?.user?._id;
+  const { data: cart, isLoading, isError, error } = useCart({ userId: userId });
+  const { mutate } = useCartMutate();
 
-  if (form.isLoading) return <div>Loading...</div>;
-  if (form.isError) return <div>Error...</div>;
-  async (userId: string) => {
-    return await form.FetchCart(userId);
-  };
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {String(error)}</div>;
 
   return (
     <div>
@@ -52,98 +50,113 @@ const CartPage = () => {
           {/* left */}
           <div>
             <span className="text-xl flex mb-[1px] items-center justify-between pb-6 border-b font-semibold">
-              Your Cart
-              <p className="text-[#9D9EA2] lg:text-base  mb:text-sm">(3)</p>
+              Your Cart ({cart.products.length})
+              <p className="text-[#9D9EA2] lg:text-base  mb:text-sm">()Xoá</p>
             </span>
             {/* list items */}
 
             <div className="flex flex-col border-b lg:pb-[22px] mb:pb-3">
-              {" "}
-              {form.cart &&
-                form.cart.products.map(
-                  (product: IProduct & { quantity: number }, i: number) => (
-                    <section
-                      className="flex items-center   lg:mt-[23px] mb:mt-[15px] gap-x-4"
-                      key={i}
-                    >
-                      <img
-                        className="border rounded w-12 h-12 p-1"
-                        src={product.feature_image}
-                        alt=""
-                      />
-                      {/* change quantity, name , price */}
-                      <div className="relative w-full flex flex-col *:justify-between gap-y-2.5 lg:gap-y-3">
-                        <div className="lg:py-2 mb-0.5 lg:mb-0 flex lg:flex-row mb:flex-col lg:items-center gap-x-4">
-                          <span className="text-[#9D9EA2] text-sm w-60 truncate">
-                            {product.name}
-                          </span>
-                          <div className="relative lg:absolute lg:left-1/2 lg:-translate-x-[20.5%]">
-                            <div className="lg:mt-0 mb:mt-[12.5px] flex items-center *:grid *:place-items-center *:lg:w-9 *:lg:h-9 *:mb:w-8 *:mb:h-8">
-                              <button
-                                onClick={() =>
-                                  mutate({ action: "descrease", product })
-                                }
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width={12}
-                                  height={12}
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth={2}
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="lucide lucide-minus text-xs"
-                                >
-                                  <path d="M5 12h14" />
-                                </svg>
-                              </button>
+              {cart?.products?.map((product: IProduct, i: number) => (
+                <section
+                  className="flex items-center   lg:mt-[23px] mb:mt-[15px] gap-x-4 ml-2"
+                  key={i}
+                >
+                  <button
+                    onClick={() =>
+                      mutate({
+                        aciton: "delete-product",
+                        product,
+                        userId,
+                      } as any)
+                    }
+                  >
+                    <i className="fa-solid fa-trash text-red-700 text-xl"></i>
+                  </button>
+                  <img
+                    className="border rounded w-12 h-12 p-1"
+                    src={product.feature_image}
+                    alt=""
+                  />
 
-                              <div className="bg-[#F4F4F4] text-xs rounded">
-                                {product.quantity}
-                              </div>
-                              <button
-                                onClick={() =>
-                                  mutate({ action: "inscrease", product })
-                                }
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width={12}
-                                  height={12}
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth={2}
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="lucide lucide-plus text-xs"
-                                >
-                                  <path d="M5 12h14" />
-                                  <path d="M12 5v14" />
-                                </svg>
-                              </button>
-                              <span className="ml-3 text-sm">
-                                ${product.regular_price.toLocaleString("en-US")}
-                              </span>
-                            </div>
+                  <div className="relative w-full flex flex-col *:justify-between gap-y-2.5 lg:gap-y-3">
+                    <div className="lg:py-2 mb-0.5 lg:mb-0 flex lg:flex-row mb:flex-col lg:items-center gap-x-4">
+                      <span className="text-[#9D9EA2] text-sm w-60 truncate">
+                        {product.name}
+                      </span>
+                      <div className="relative lg:absolute lg:left-1/2 lg:-translate-x-[20.5%]">
+                        <div className="lg:mt-0 mb:mt-[12.5px] flex items-center *:grid *:place-items-center *:lg:w-9 *:lg:h-9 *:mb:w-8 *:mb:h-8">
+                          <button
+                            onClick={() =>
+                              mutate({
+                                action: "descrease",
+                                product,
+                                userId,
+                              } as any)
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width={12}
+                              height={12}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="lucide lucide-minus text-xs"
+                            >
+                              <path d="M5 12h14" />
+                            </svg>
+                          </button>
+
+                          <div className="bg-[#F4F4F4] text-xs rounded">
+                            {product.quantity}
                           </div>
-                          {/* price */}
-                          <span className="hidden lg:block text-[#9D9EA2] text-sm">
-                            $
-                            {(
-                              product.regular_price * product.quantity
-                            ).toLocaleString("en-US")}
+                          <button
+                            onClick={() =>
+                              mutate({
+                                action: "inscrease",
+                                product,
+                                userId,
+                              } as any)
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width={12}
+                              height={12}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="lucide lucide-plus text-xs"
+                            >
+                              <path d="M5 12h14" />
+                              <path d="M12 5v14" />
+                            </svg>
+                          </button>
+                          <span className="ml-3 text-sm">
+                            ${product.regular_price.toLocaleString("en-US")}
                           </span>
                         </div>
                       </div>
-                    </section>
-                  )
-                )}
+                      {/* price */}
+                      <span className="hidden lg:block text-[#9D9EA2] text-sm">
+                        $
+                        {(
+                          product.regular_price * product.quantity
+                        ).toLocaleString("en-US")}
+                      </span>
+                    </div>
+                  </div>
+                </section>
+              ))}
               <div className="w-full flex justify-between text-sm pt-4 lg:pt-4 border-t">
                 <span className="text-[#9D9EA2] mx-3">Subtotal</span>
-                <span>$245.00</span>
+                <span>${cart.totalPrice.toLocaleString("eu-US")}</span>
               </div>
             </div>
           </div>
@@ -153,7 +166,9 @@ const CartPage = () => {
               <div className="flex flex-col gap-y-4">
                 <section className="flex justify-between text-sm">
                   <span className="text-[#9D9EA2]">Subtotal </span>
-                  <p>$497.00</p>
+                  <p>
+                    ${(10 + cart.finalTotalPrice).toLocaleString("eu-US")},00
+                  </p>
                 </section>
                 <section className="flex justify-between text-sm">
                   <span className="text-[#9D9EA2]">Discount </span>
@@ -161,7 +176,7 @@ const CartPage = () => {
                 </section>
                 <section className="flex justify-between text-sm">
                   <span className="text-[#9D9EA2]">Shipping Costs </span>
-                  <p>$50.00</p>
+                  <p>$10,00</p>
                 </section>
               </div>
               {/* voucher */}
@@ -200,8 +215,15 @@ const CartPage = () => {
               >
                 Continue Shopping
               </a>
-              <button className="bg-[#C8C9CB] px-10 h-14 rounded-[100px] text-white flex my-[13px] gap-x-4 place-items-center justify-center">
-                <span>Checkout</span>|<span>$547.00</span>
+              <button
+                className={` px-10 h-14 rounded-[100px] text-white flex my-[13px] gap-x-4 place-items-center justify-center 
+                  ${cart.finalTotalPrice >= 0 ? "bg-[#17AF26] hover:bg-[#279131]" : "bg-[#C8C9CB] cursor-not-allowed"}`}
+              >
+                <span>Checkout</span>|
+                <span>
+                  {" "}
+                  ${(10 + cart.finalTotalPrice).toLocaleString("eu-US")},00
+                </span>
               </button>
               {/* payment */}
               <div className="flex flex-col gap-y-4 border-t mt-[3px] pt-[22px]">

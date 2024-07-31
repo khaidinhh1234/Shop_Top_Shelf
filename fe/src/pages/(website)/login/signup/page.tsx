@@ -30,6 +30,7 @@ const Signup = () => {
         nav("/signin");
         return data;
       } catch (error: any) {
+        toast.error(error.message);
         throw new Error(error.response.data.message);
       }
     },

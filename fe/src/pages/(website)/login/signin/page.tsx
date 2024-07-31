@@ -27,15 +27,16 @@ const Signin = () => {
       try {
         const data = await instance.post("/auth/signin", user);
         toast.success("Đăng Nhập thành công");
+        localStorage.setItem("user", JSON.stringify(data.data));
         nav("/admin");
         return data;
       } catch (error: any) {
+        toast.error(error.response.data.message);
         throw new Error(error.response.data.message);
       }
     },
     onSuccess: () => {},
     onError: (error: any) => {
-      console.log(error);
       toast.error(error.response.data.message);
     },
   });

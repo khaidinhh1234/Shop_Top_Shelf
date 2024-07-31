@@ -60,7 +60,9 @@ export const columns: ColumnDef<IProduct>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="ml-5 font-semibold">{row.getValue("name")}</div>
+      <div className="ml-5 font-semibold truncate w-40">
+        {row.getValue("name")}
+      </div>
     ),
   },
 

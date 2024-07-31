@@ -1,6 +1,16 @@
-import React from "react";
+import { useCart } from "@/common/hook/useCart";
+import { useLocalStorage } from "@/common/hook/useStoratge";
+import { Link } from "react-router-dom";
 
 const Header = () => {
+  const [user] = useLocalStorage("user", {});
+  const userId = user?.user?._id;
+
+  const { data: cart, isLoading, isError, error } = useCart({ userId });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {String(error)}</div>;
+
   return (
     <header>
       {/* top header */}
@@ -66,23 +76,26 @@ const Header = () => {
           <div className="lg:gap-x-6 mb:gap-x-4 lg:-translate-x-[60px] mb:-translate-x-[22px]">
             <span className="text-sm">Your Account</span>|
             <button className="h-[24px]">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-6 w-[24px]"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                />
-              </svg>
-              <span className="absolute bg-red-500 top-2 rounded-[50%] w-[16px] h-[16px] text-xs text-white">
-                1
-              </span>
+              <Link to="/carts">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-6 w-[24px]"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                  />
+                </svg>
+
+                <span className="absolute bg-red-500 top-2 rounded-[50%] w-[16px] h-[16px] text-xs text-white">
+                  {cart.products.length}
+                </span>
+              </Link>
             </button>
           </div>
         </div>
@@ -91,7 +104,7 @@ const Header = () => {
       <div className="w-full mb:hidden lg:block">
         <div className="w-full flex justify-center items-center *:flex *:justify-center">
           <div className="gap-x-[49.5px] h-[56px] items-center">
-            <a href="../src/products.html">Shop All</a>
+            <a href="/shop">Shop All</a>
             <a href="../src/detail.html">Flower</a>
             <a href="../src/cart.html">Edibles</a>
             <a href="">Concentrates</a>
