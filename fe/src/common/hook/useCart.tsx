@@ -1,106 +1,70 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocalStorage } from "./useStoratge";
-i;
-import Cart from "./../../pages/(website)/cart/page";
-import { update } from "lodash";
 import instance from "@/configs/axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-type Cart = {
-  userId: string;
-  productId?: string;
-  quantity?: number;
-  CartId?: string;
-};
-const CART_QUERY_KEY = "cart";
-const FetchCart = async (UserId: string) => {
-  const res = await instance.get(`/carts/${UserId}`);
-  return res.data;
+import { IProduct } from "../types/product";
+import { useLocalStorage } from "./useStoratge";
+import { toast } from "react-toastify";
+
+export const useCart = ({ userId }: any) => {
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["ProductsCart_key"],
+    queryFn: async () => {
+      const res = await instance.get(`/carts/${userId}`);
+      return res.data;
+    },
+  });
+  useMutation({
+    mutationFn: async (data) => {
+      console.log(data);
+    },
+  });
+  return { data, isLoading, isError, error };
 };
 
-// const modifyCart = async (action: string, params: Cart) => {
-//   if (action === "delete") {
-//     const uri = `/carts/${params.productId}`;
-//     const { data } = await instance.delete(uri);
-//     return data.cart;
-//   }
-//   if (action === "put") {
-//     const uri = `/carts/${action}`;
-//     const { data } = await instance.put(uri, params);
-//     return data.cart;
-//   }
-//   const uri = `/carts/${action}`;
-//   const { data } = await instance.post(uri, params);
-//   return data.cart;
-// };
-const useCart = () => {
+export const useCartMutate = () => {
   const queryClient = useQueryClient();
-  const [user] = useLocalStorage("user", {});
-  const userId = user.user._id;
-  const {
-    data: cart,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["cart", userId],
-    queryFn: () => FetchCart(userId),
+  return useMutation({
+    mutationFn: async (data: {
+      action: string;
+      product: IProduct;
+      userId: any;
+      quantity?: number;
+    }) => {
+      const action = data.action;
+      const userId = data.userId;
+      const quantity = data.quantity;
 
-    enabled: !!userId,
-  });
-  const { mutate } = useMutation({
-    mutationFn: async (action: any) => {
-      const productId = action.product.productId;
-      const quantity = action.product.quantity;
-      console.log(userId, productId, quantity);
-      const { data } = await instance.post(`/carts/${action.action}`, {
-        userId,
-        productId,
-      });
+      const productId = data.product._id || data.product.productId;
+      console.log(productId);
+      if (action == "delete-product") {
+        const res = await instance.delete(`/carts/delete-product`, userId);
+        toast.success(`Bạn đã sản phẩm khỏi cart`);
+        return res.data;
+      } else {
+        const res = await instance.post(
+          `/carts/${action}`,
+          quantity
+            ? { productId, userId, quantity }
+            : {
+                productId,
+                userId,
+              }
+        );
 
-      return data;
+        return res.data, quantity;
+      }
     },
 
-    onSuccess: () => {
+    onSuccess: (quantity) => {
+      !quantity
+        ? ""
+        : quantity < 10
+          ? toast.success(`Bạn đã Thêm  ${quantity} sản phẩm vào cart`)
+          : toast.error(`Bạn chỉ được nhập tối đa 10 sản phẩm vào cart `);
+
       queryClient.invalidateQueries({
-        queryKey: [CART_QUERY_KEY, userId],
+        queryKey: ["ProductsCart_key"],
       });
     },
   });
-  // const mutationOptions = {
-  //   onSucess: () => {
-  //     queryClient.invalidateQueries({
-  //       queryKey: [CART_QUERY_KEY, userId],
-  //     });
-  //   },
-  // };
-
-  // const performMutation = (action: string) => {
-  //   return useMutation({
-  //     mutationFn: (params: Cart) => modifyCart(action, params),
-  //     ...mutationOptions,
-  //   });
-  // };
-
-  // const CartAction = (
-  //   action: string,
-  //   productId?: string,
-  //   quantity?: number
-  // ) => ({
-  //   mutate: (productId: string, quantity?: number) =>
-  //     performMutation(action).mutate({ userId, quantity, productId }),
-  // });
-
-  return {
-    FetchCart,
-    mutate,
-    cart,
-    isLoading,
-    isError,
-    error,
-    // addItemCart: CartAction("add-to-cart"),
-    // deleteCart: CartAction("delete"),
-    // updateCart: CartAction("update"),
-  };
 };
-
-export default useCart;

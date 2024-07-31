@@ -6,9 +6,15 @@ import LayoutAdmin from "@/pages/(dashboard)/page";
 import ProductsAdd from "@/pages/(dashboard)/products/_component/add";
 import ProductsEdit from "@/pages/(dashboard)/products/_component/edit";
 import ProductsList from "@/pages/(dashboard)/products/page";
+
+import Cart from "@/pages/(website)/cart/page";
+import Homepage from "@/pages/(website)/home/page";
+import LayoutWebsite from "@/pages/(website)/Layout";
 import Signin from "@/pages/(website)/login/signin/page";
 import Signup from "@/pages/(website)/login/signup/page";
 import Notfound from "@/pages/(website)/notfound/page";
+import ProductsDetail from "@/pages/(website)/productdetail/page";
+import ShopPage from "@/pages/(website)/shop/page";
 import { Route, Routes } from "react-router-dom";
 
 import { ToastContainer } from "react-toastify";
@@ -17,9 +23,12 @@ const Router = () => {
   return (
     <>
       <Routes>
-        {/* <Route path="/" element={<LayoutWebsite />}>
-          <Route index element={<HomePage />} />
-        </Route> */}
+        <Route path="/" element={<LayoutWebsite />}>
+          <Route index element={<Homepage />} />{" "}
+          <Route path="shop" element={<ShopPage />} />
+          <Route path="carts" element={<Cart />} />
+          <Route path="detail/:id" element={<ProductsDetail />} />
+        </Route>
         <Route path="admin" element={<LayoutAdmin />}>
           <Route index element={<DashboardPage />} />
           <Route path="products" element={<ProductsList />} />
